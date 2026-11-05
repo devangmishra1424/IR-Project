@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest>=8.0
+ruff>=0.5
+mypy>=1.10
+# Reference TF-IDF implementation used only by the tests.
+scikit-learn>=1.4

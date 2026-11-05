@@ -1,0 +1,17 @@
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.claude/
+
+# Large, reproducible artefacts (rebuild with `python -m maillens ...`; see README)
+/data/
+/artifacts/
+*.log
+
+# OS noise
+.DS_Store
+Thumbs.db
