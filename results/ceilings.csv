@@ -1,0 +1,4 @@
+kind,queries,mean_relevant,median_relevant,p10_ceiling
+keyword,300,5.9600,5.0000,0.5610
+question,1515,1.2508,1.0000,0.1251
+subject,300,5.9600,5.0000,0.5610

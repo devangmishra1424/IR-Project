@@ -1,0 +1,77 @@
+answer_length,system,questions,MRR
+up to 50 words,bm25,106,0.7269
+up to 50 words,bm25_default,106,0.7818
+up to 50 words,bm25_raw,106,0.7465
+up to 50 words,dense,106,0.6483
+up to 50 words,hybrid,106,0.7685
+up to 50 words,hybrid_bm25_dense,106,0.7336
+up to 50 words,hybrid_k1,106,0.7803
+up to 50 words,hybrid_k10,106,0.7848
+up to 50 words,hybrid_k100,106,0.7574
+up to 50 words,hybrid_k20,106,0.7656
+up to 50 words,hybrid_k200,106,0.7451
+up to 50 words,hybrid_k40,106,0.7689
+up to 50 words,hybrid_k5,106,0.7845
+up to 50 words,hybrid_k500,106,0.7369
+up to 50 words,hybrid_k60,106,0.7685
+up to 50 words,hybrid_w2,106,0.7879
+up to 50 words,hybrid_w3,106,0.7861
+up to 50 words,tfidf,106,0.6509
+up to 50 words,tfidf_raw,106,0.6506
+51-150 words,bm25,504,0.8150
+51-150 words,bm25_default,504,0.8401
+51-150 words,bm25_raw,504,0.8061
+51-150 words,dense,504,0.6288
+51-150 words,hybrid,504,0.8012
+51-150 words,hybrid_bm25_dense,504,0.7877
+51-150 words,hybrid_k1,504,0.8360
+51-150 words,hybrid_k10,504,0.8332
+51-150 words,hybrid_k100,504,0.7975
+51-150 words,hybrid_k20,504,0.8261
+51-150 words,hybrid_k200,504,0.7947
+51-150 words,hybrid_k40,504,0.8085
+51-150 words,hybrid_k5,504,0.8366
+51-150 words,hybrid_k500,504,0.7918
+51-150 words,hybrid_k60,504,0.8012
+51-150 words,hybrid_w2,504,0.8238
+51-150 words,hybrid_w3,504,0.8312
+51-150 words,tfidf,504,0.6250
+51-150 words,tfidf_raw,504,0.6311
+151-400 words,bm25,605,0.8020
+151-400 words,bm25_default,605,0.8053
+151-400 words,bm25_raw,605,0.7862
+151-400 words,dense,605,0.6057
+151-400 words,hybrid,605,0.7546
+151-400 words,hybrid_bm25_dense,605,0.7629
+151-400 words,hybrid_k1,605,0.7775
+151-400 words,hybrid_k10,605,0.7739
+151-400 words,hybrid_k100,605,0.7537
+151-400 words,hybrid_k20,605,0.7692
+151-400 words,hybrid_k200,605,0.7497
+151-400 words,hybrid_k40,605,0.7618
+151-400 words,hybrid_k5,605,0.7769
+151-400 words,hybrid_k500,605,0.7472
+151-400 words,hybrid_k60,605,0.7546
+151-400 words,hybrid_w2,605,0.7784
+151-400 words,hybrid_w3,605,0.7896
+151-400 words,tfidf,605,0.4823
+151-400 words,tfidf_raw,605,0.4743
+over 400 words,bm25,300,0.7774
+over 400 words,bm25_default,300,0.7513
+over 400 words,bm25_raw,300,0.7839
+over 400 words,dense,300,0.6044
+over 400 words,hybrid,300,0.7413
+over 400 words,hybrid_bm25_dense,300,0.7521
+over 400 words,hybrid_k1,300,0.7566
+over 400 words,hybrid_k10,300,0.7493
+over 400 words,hybrid_k100,300,0.7401
+over 400 words,hybrid_k20,300,0.7494
+over 400 words,hybrid_k200,300,0.7387
+over 400 words,hybrid_k40,300,0.7429
+over 400 words,hybrid_k5,300,0.7567
+over 400 words,hybrid_k500,300,0.7360
+over 400 words,hybrid_k60,300,0.7413
+over 400 words,hybrid_w2,300,0.7625
+over 400 words,hybrid_w3,300,0.7769
+over 400 words,tfidf,300,0.3794
+over 400 words,tfidf_raw,300,0.3871

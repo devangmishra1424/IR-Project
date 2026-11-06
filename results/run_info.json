@@ -1,0 +1,55 @@
+{
+  "created_utc": "2026-11-06T01:20:57+00:00",
+  "seconds": 2210,
+  "python": "3.12.10",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "versions": {
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "torch": "2.15.0+cpu",
+    "sentence-transformers": "6.2.0",
+    "scikit-learn": "1.9.1",
+    "nltk": "3.10.4"
+  },
+  "bm25_tuned": {
+    "k1": 0.3,
+    "b": 0.75
+  },
+  "rrf_k": 60,
+  "eval_depth": 1000,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "chunking": {
+    "words": 140,
+    "stride": 120,
+    "max_chunks": 4
+  },
+  "queries": {
+    "test/question": 1515,
+    "dev/question": 300,
+    "test/subject": 300,
+    "test/keyword": 300,
+    "dev/subject": 100,
+    "dev/keyword": 100
+  },
+  "corpus": {
+    "raw_rows": 517401,
+    "dropped_missing_id_or_date": 0,
+    "dropped_implausible_date": 605,
+    "duplicate_message_ids": 0,
+    "duplicate_content": 263553,
+    "unique_messages": 253243,
+    "threads_total": 174133,
+    "questions_selected": 1815,
+    "questions_answerable": 1815,
+    "answer_messages": 1633,
+    "sample_messages": 50002,
+    "sample_threads": 34074,
+    "sample_empty_bodies": 248
+  },
+  "index": {
+    "documents": 50002,
+    "terms": 111205,
+    "postings": 4110658,
+    "dense_chunks": 85852
+  }
+}
