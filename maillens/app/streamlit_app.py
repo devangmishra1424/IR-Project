@@ -78,6 +78,7 @@ def _pick_example() -> None:
     if choice:
         st.session_state["query_box"] = choice
         st.session_state["active_query"] = choice
+        st.query_params["q"] = choice
 
 
 @st.cache_data(show_spinner=False, max_entries=64)
@@ -270,6 +271,11 @@ def show_email(doc_id: int, query: str) -> None:
 def render_search(engine: SearchEngine, options: dict[str, object]) -> None:
     st.markdown('<div class="ml-brand">MailLens</div>', unsafe_allow_html=True)
     summary = engine.summary()
+    # A link like ?q=gas+storage opens straight onto that search (shareable, bookmarkable).
+    shared = st.query_params.get("q", "").strip()
+    if shared and "active_query" not in st.session_state:
+        st.session_state["query_box"] = shared
+        st.session_state["active_query"] = shared
     st.markdown(
         f'<div class="ml-tagline">Four ways to search {summary.emails:,} Enron e-mails, '
         "side by side. Ask a question or type keywords.</div>",
@@ -293,6 +299,7 @@ def render_search(engine: SearchEngine, options: dict[str, object]) -> None:
         submitted = button.form_submit_button("Search", type="primary", width="stretch")
     if submitted:
         st.session_state["active_query"] = st.session_state.get("query_box", "").strip()
+        st.query_params["q"] = st.session_state["active_query"]
 
     query = st.session_state.get("active_query", "")
     if not query:
