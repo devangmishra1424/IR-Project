@@ -144,7 +144,11 @@ def precision_recall_figure(
 def metrics_bars_figure(
     ci: pd.DataFrame, out: Path, metrics: Sequence[str] = ("MAP", "nDCG@10")
 ) -> Path:
-    """Grouped columns of the headline metrics with 95% bootstrap intervals."""
+    """Grouped columns of the headline metrics with 95% bootstrap intervals.
+
+    Only the best column of each group carries its value: a number on every bar would bury the
+    chart, and the exact figures of every system are in the results tables.
+    """
     kinds = [k for k in theme.KIND_LABELS if k in set(ci["kind"])]
     systems = _systems_present(ci)
     fig, axes = plt.subplots(1, len(metrics), figsize=(7.2, 3.0), sharey=True)
@@ -153,39 +157,40 @@ def metrics_bars_figure(
     offsets = (np.arange(len(systems)) - (len(systems) - 1) / 2) * (width + 0.02)
     for ax, metric in zip(axes, metrics, strict=True):
         _style(ax)
+        frames = [ci[ci["system"] == s].set_index("kind").reindex(kinds) for s in systems]
+        means = np.vstack([f[metric].to_numpy() for f in frames])
+        lows = np.vstack([f[f"{metric}_low"].to_numpy() for f in frames])
+        highs = np.vstack([f[f"{metric}_high"].to_numpy() for f in frames])
         for j, system in enumerate(systems):
-            sub = ci[ci["system"] == system].set_index("kind").reindex(kinds)
             x = np.arange(len(kinds)) + offsets[j]
-            mean = sub[metric].to_numpy()
-            err = np.vstack(
-                [mean - sub[f"{metric}_low"].to_numpy(), sub[f"{metric}_high"].to_numpy() - mean]
+            ax.bar(
+                x, means[j], width=width, color=theme.SYSTEM_COLORS[system], linewidth=0, zorder=2
             )
-            ax.bar(x, mean, width=width, color=theme.SYSTEM_COLORS[system], linewidth=0, zorder=2)
             ax.errorbar(
                 x,
-                mean,
-                yerr=err,
+                means[j],
+                yerr=np.vstack([means[j] - lows[j], highs[j] - means[j]]),
                 fmt="none",
                 ecolor=theme.INK_MUTED,
                 elinewidth=0.8,
                 capsize=0,
                 zorder=3,
             )
-            for xi, value, high in zip(x, mean, sub[f"{metric}_high"].to_numpy(), strict=True):
-                ax.text(
-                    xi,
-                    high + 0.015,
-                    f"{value:.2f}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=6.5,
-                    color=theme.INK_SECONDARY,
-                )
+        for group, j in enumerate(means.argmax(axis=0)):
+            ax.text(
+                group + offsets[j],
+                highs[j, group] + 0.015,
+                f"{means[j, group]:.2f}",
+                ha="center",
+                va="bottom",
+                fontsize=7,
+                color=theme.INK_SECONDARY,
+            )
         ax.set_xticks(np.arange(len(kinds)))
         ax.set_xticklabels([theme.KIND_SHORT[k] for k in kinds])
-        ax.set_title(metric, fontsize=9, loc="left", pad=8)
+        ax.set_title(metric, fontsize=9, loc="left", pad=16)
         ax.set_ylim(0, 1.0)
-    axes[0].set_ylabel("Mean over test queries (bars: 95% CI)")
+    axes[0].set_ylabel("Mean over test queries (whiskers: 95% CI)")
     fig.subplots_adjust(bottom=0.27, wspace=0.08)
     _legend(fig, systems)
     return _save(fig, out)
@@ -218,6 +223,17 @@ def rrf_k_figure(
             if system in ref.index:
                 y = float(ref.loc[system, metric])
                 ax.axhline(y, color=theme.SYSTEM_COLORS[system], linewidth=1.2, zorder=2)
+                ax.plot(
+                    [data["k"].max()],
+                    [y],
+                    marker=theme.SYSTEM_MARKERS[system],
+                    color=theme.SYSTEM_COLORS[system],
+                    markersize=MARKER_SIZE,
+                    markeredgecolor=theme.PAPER,
+                    markeredgewidth=1.0,
+                    zorder=4,
+                    clip_on=False,
+                )
                 ax.text(
                     data["k"].max(),
                     y,
@@ -239,7 +255,8 @@ def rrf_k_figure(
         pad = max(0.01, (hi - lo) * 0.15)
         ax.set_ylim(lo - pad, hi + pad)
     axes[0].set_ylabel(metric)
-    fig.subplots_adjust(bottom=0.2, wspace=0.55)
+    fig.subplots_adjust(bottom=0.3, wspace=0.55)
+    _legend(fig, ["hybrid", "bm25", "dense"])
     return _save(fig, out)
 
 
@@ -268,7 +285,7 @@ def success_at_k_figure(per_query: pd.DataFrame, out: Path, max_k: int = 50) -> 
     ax.set_ylim(0, 1.0)
     ax.set_xlabel("Rank cut-off k")
     ax.set_ylabel("Questions answered in the top k")
-    fig.subplots_adjust(bottom=0.32)
+    fig.subplots_adjust(bottom=0.27)
     _legend(fig, systems)
     return _save(fig, out)
 
@@ -310,7 +327,7 @@ def corpus_figure(emails: pd.DataFrame, out: Path) -> Path:
     axes[1].set_yscale("log")
     axes[1].set_title("Messages per thread", fontsize=9, loc="left", pad=8)
     axes[1].set_ylabel("Threads (log scale)")
-    axes[1].tick_params(axis="x", labelsize=7)
+    axes[1].tick_params(axis="x", labelsize=7, rotation=45)
 
     words = (emails["fresh"] + " " + emails["quoted"]).str.split().str.len()
     bins = [0, 1, 25, 50, 100, 200, 400, 800, 10**9]
