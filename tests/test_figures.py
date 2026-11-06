@@ -118,3 +118,10 @@ def test_corpus_figure_is_written(tmp_path):
         }
     )
     assert_png(figures.corpus_figure(emails, tmp_path / "c.png"))
+
+
+def test_pipeline_figure_is_written(tmp_path):
+    path = figures.pipeline_figure(
+        {"raw_rows": 517401, "sample_messages": 50002}, tmp_path / "p.png"
+    )
+    assert_png(path)

@@ -347,3 +347,131 @@ def make_all_figures(results_dir: Path, emails: pd.DataFrame) -> list[Path]:
         ),
         corpus_figure(emails, out / "corpus.png"),
     ]
+
+
+# ----------------------------------------------------------------------------- the pipeline
+def _box(
+    ax: Axes, x: float, y: float, w: float, h: float, text: str, accent: str | None = None
+) -> None:
+    from matplotlib.patches import FancyBboxPatch
+
+    ax.add_patch(
+        FancyBboxPatch(
+            (x, y),
+            w,
+            h,
+            boxstyle="round,pad=0,rounding_size=0.09",
+            linewidth=0.9,
+            edgecolor=theme.BASELINE,
+            facecolor=theme.PAPER,
+            zorder=2,
+        )
+    )
+    if accent:
+        ax.add_patch(
+            FancyBboxPatch(
+                (x, y),
+                0.07,
+                h,
+                boxstyle="round,pad=0,rounding_size=0.035",
+                linewidth=0,
+                facecolor=accent,
+                zorder=3,
+            )
+        )
+    ax.text(
+        x + w / 2 + (0.03 if accent else 0),
+        y + h / 2,
+        text,
+        ha="center",
+        va="center",
+        fontsize=7.6,
+        color=theme.INK,
+        linespacing=1.25,
+        zorder=4,
+    )
+
+
+def _arrow(ax: Axes, start: tuple[float, float], end: tuple[float, float]) -> None:
+    ax.annotate(
+        "",
+        xy=end,
+        xytext=start,
+        arrowprops={
+            "arrowstyle": "-|>",
+            "color": theme.INK_MUTED,
+            "linewidth": 1.0,
+            "shrinkA": 0,
+            "shrinkB": 0,
+            "mutation_scale": 8,
+        },
+        zorder=1,
+    )
+
+
+def pipeline_figure(counts: dict[str, int], out: Path) -> Path:
+    """The architecture: what happens offline when the indexes are built and online per query."""
+    fig, ax = plt.subplots(figsize=(7.2, 3.3))
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0.15, 5)
+    ax.axis("off")
+    colors = theme.SYSTEM_COLORS
+
+    ax.text(
+        0,
+        4.88,
+        "Offline: build the indexes",
+        fontsize=8.2,
+        color=theme.INK_SECONDARY,
+        fontweight="bold",
+        va="center",
+    )
+    raw = f"{counts['raw_rows']:,}" if "raw_rows" in counts else "raw dump"
+    kept = f"{counts['sample_messages']:,}" if "sample_messages" in counts else "sample"
+    _box(ax, 0.0, 3.55, 1.75, 0.9, f"Enron dump\n{raw} files")
+    _box(ax, 2.15, 3.55, 2.05, 0.9, f"De-duplicate · clean\nthread · sample\n{kept} e-mails")
+    _box(ax, 4.6, 4.05, 2.0, 0.55, "Analyzer: tokens,\nstop-words, stems")
+    _box(ax, 7.0, 4.05, 1.55, 0.55, "Inverted\nindex")
+    _box(ax, 4.6, 3.35, 2.0, 0.55, "Split into\n≤4 chunks / e-mail")
+    _box(ax, 7.0, 3.35, 2.6, 0.55, "Sentence-Transformer\nchunk embeddings")
+    _arrow(ax, (1.75, 4.0), (2.15, 4.0))
+    _arrow(ax, (4.2, 4.1), (4.6, 4.33))
+    _arrow(ax, (4.2, 3.9), (4.6, 3.62))
+    _arrow(ax, (6.6, 4.33), (7.0, 4.33))
+    _arrow(ax, (6.6, 3.62), (7.0, 3.62))
+
+    ax.plot([0, 10], [2.95, 2.95], color=theme.GRID, linewidth=0.8)
+    ax.text(
+        0,
+        2.7,
+        "Online: answer one query",
+        fontsize=8.2,
+        color=theme.INK_SECONDARY,
+        fontweight="bold",
+        va="center",
+    )
+    _box(ax, 0.0, 1.35, 1.2, 0.9, "Query")
+    _box(ax, 1.6, 1.8, 1.9, 0.55, "Analyzer", None)
+    _box(ax, 1.6, 0.95, 1.9, 0.55, "Encoder", None)
+    _box(ax, 4.05, 2.0, 1.7, 0.5, "TF-IDF cosine", colors["tfidf"])
+    _box(ax, 4.05, 1.4, 1.7, 0.5, "BM25", colors["bm25"])
+    _box(ax, 4.05, 0.8, 1.7, 0.5, "Dense, max chunk", colors["dense"])
+    _box(ax, 6.35, 1.4, 1.75, 0.9, "Reciprocal rank\nfusion", colors["hybrid"])
+    _box(ax, 8.55, 1.4, 1.45, 0.9, "Ranked\ne-mails")
+    _arrow(ax, (1.2, 1.9), (1.6, 2.07))
+    _arrow(ax, (1.2, 1.7), (1.6, 1.22))
+    _arrow(ax, (3.5, 2.07), (4.05, 2.25))
+    _arrow(ax, (3.5, 2.07), (4.05, 1.65))
+    _arrow(ax, (3.5, 1.22), (4.05, 1.05))
+    for y in (2.25, 1.65, 1.05):
+        _arrow(ax, (5.75, y), (6.35, 1.85))
+    _arrow(ax, (8.1, 1.85), (8.55, 1.85))
+    ax.text(
+        0,
+        0.38,
+        "TF-IDF and BM25 read the inverted index; the dense ranker reads the chunk embeddings.",
+        fontsize=7.4,
+        color=theme.INK_MUTED,
+        va="center",
+    )
+    return _save(fig, out)
