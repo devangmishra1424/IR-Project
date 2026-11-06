@@ -34,6 +34,30 @@ def test_fused_order_matches_the_explainable_implementation_on_random_lists():
             assert fused_order(lists, k=k) == expected
 
 
+def test_weighted_fused_order_matches_the_explainable_implementation():
+    rng = np.random.default_rng(1)
+    for _ in range(100):
+        lists = [[int(d) for d in rng.permutation(25)[: rng.integers(1, 25)]] for _ in range(3)]
+        weights = [float(w) for w in rng.uniform(0.5, 4.0, size=3)]
+        named = {f"r{i}": lst for i, lst in enumerate(lists)}
+        expected = reciprocal_rank_fusion(
+            named, k=60, weights=dict(zip(named, weights, strict=True))
+        )
+        assert fused_order(lists, k=60, weights=weights) == [h.doc_id for h in expected]
+
+
+@pytest.mark.parametrize("weights", [[1.0, 2.0], [1.0, 0.0, 1.0], [1.0, -1.0, 1.0]])
+def test_fused_order_rejects_bad_weights(weights):
+    with pytest.raises(ValueError, match="positive weight"):
+        fused_order([[1], [2], [3]], weights=weights)
+
+
+def test_fuse_runs_weights_can_reverse_a_tie():
+    runs = {"x": [[1, 2]], "y": [[2, 1]]}
+    assert fuse_runs(runs, ["x", "y"])[0].tolist() == [1, 2]  # tie -> lower id
+    assert fuse_runs(runs, ["x", "y"], weights={"y": 3.0})[0].tolist() == [2, 1]
+
+
 def test_fused_order_rejects_negative_k():
     with pytest.raises(ValueError, match="k must"):
         fused_order([[1, 2]], k=-1)

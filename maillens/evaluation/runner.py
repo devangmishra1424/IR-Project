@@ -46,8 +46,9 @@ def fuse_runs(
     *,
     k: int = RRF_K,
     depth: int = EVAL_DEPTH,
+    weights: Mapping[str, float] | None = None,
 ) -> Run:
-    """Reciprocal rank fusion of the named runs, query by query."""
+    """Reciprocal rank fusion of the named runs, query by query (unlisted runs weigh 1)."""
     if not members:
         raise ValueError("need at least one run to fuse")
     unknown = [m for m in members if m not in runs]
@@ -56,8 +57,12 @@ def fuse_runs(
     n_queries = len(runs[members[0]])
     if any(len(runs[m]) != n_queries for m in members):
         raise ValueError("runs must cover the same queries")
+    positional = None if weights is None else [weights.get(m, 1.0) for m in members]
     return [
-        np.asarray(fused_order([_ints(runs[m][i]) for m in members], k=k)[:depth], dtype=np.int32)
+        np.asarray(
+            fused_order([_ints(runs[m][i]) for m in members], k=k, weights=positional)[:depth],
+            dtype=np.int32,
+        )
         for i in range(n_queries)
     ]
 

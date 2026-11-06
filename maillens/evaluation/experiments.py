@@ -43,7 +43,7 @@ from maillens.rankers.tfidf import TfidfRanker
 log = logging.getLogger(__name__)
 
 MAIN_SYSTEMS = ("tfidf", "bm25", "dense", "hybrid")
-BM25_GRID_K1 = (0.6, 0.9, 1.2, 1.5, 2.0)
+BM25_GRID_K1 = (0.0, 0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 2.0)
 BM25_GRID_B = (0.3, 0.5, 0.75, 0.9)
 RRF_K_SWEEP = (1, 5, 10, 20, 40, 60, 100, 200, 500)
 COMPARISONS = (
@@ -132,6 +132,15 @@ def run_evaluation(
     runs["bm25_default"] = sparse_run(Bm25Ranker(index, engine.analyzer), queries, depth)
     runs["tfidf_raw"] = sparse_run(TfidfRanker(raw_index, engine.analyzer), queries, depth)
     runs["bm25_raw"] = sparse_run(Bm25Ranker(raw_index, engine.analyzer, **best), queries, depth)
+    # Exploratory: what if BM25, the strongest member, counts for more? (Weights are not tuned.)
+    for factor in (2, 3):
+        runs[f"hybrid_w{factor}"] = fuse_runs(
+            runs,
+            ["tfidf", "bm25", "dense"],
+            k=config.RRF_K,
+            depth=depth,
+            weights={"bm25": float(factor)},
+        )
     for k in RRF_K_SWEEP:
         if k != config.RRF_K:
             runs[f"hybrid_k{k}"] = fuse_runs(runs, ["tfidf", "bm25", "dense"], k=k, depth=depth)
@@ -196,6 +205,8 @@ def run_evaluation(
         "dense",
         "hybrid",
         "hybrid_bm25_dense",
+        "hybrid_w2",
+        "hybrid_w3",
     )
     _write_csv(
         test_summary[test_summary["system"].isin(ablation_systems)], results_dir / "ablation.csv"

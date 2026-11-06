@@ -177,6 +177,7 @@ def test_ablation_contains_the_raw_and_default_variants(evaluated):
     root, _, _, _ = evaluated
     ablation = pd.read_csv(root / "results" / "ablation.csv")
     assert {"bm25_raw", "tfidf_raw", "bm25_default", "hybrid_bm25_dense"} <= set(ablation["system"])
+    assert {"hybrid_w2", "hybrid_w3"} <= set(ablation["system"])
 
 
 def test_per_query_file_supports_the_explorer(evaluated):

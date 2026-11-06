@@ -160,3 +160,18 @@ def test_explanation_sums_to_the_score(analyzer, index, ranker_cls):
     assert sum(p.contribution for p in parts) == pytest.approx(top.score, rel=1e-5)
     assert parts == sorted(parts, key=lambda p: -p.contribution)
     assert all(p.tf >= 1 and p.df >= 1 for p in parts)
+
+
+def test_tfidf_hand_computed_value():
+    plain = Analyzer(stem=False, remove_stopwords=False)
+    idx = InvertedIndex.build(plain(t) for t in ["a a b", "b c", "c c c d"])
+    # idf(a) = ln(4/2) + 1 = 1.6931, idf(b) = ln(4/3) + 1 = 1.2877
+    # doc 0 raw weights: a = (1 + ln 2) * 1.6931 = 2.8666, b = 1.2877 -> length 3.1425
+    expected = (
+        (1 + math.log(2))
+        * (math.log(2) + 1)
+        / math.sqrt(((1 + math.log(2)) * (math.log(2) + 1)) ** 2 + (math.log(4 / 3) + 1) ** 2)
+    )
+    score = TfidfRanker(idx, plain).score_all("a")[0]
+    assert score == pytest.approx(expected, rel=1e-5)
+    assert score == pytest.approx(0.9122, abs=1e-3)
