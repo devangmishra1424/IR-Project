@@ -161,3 +161,21 @@ def test_documents_must_be_addressed_by_position():
     emails = pd.DataFrame({"doc_id": [5, 6]})
     with pytest.raises(ValueError, match="row position"):
         SearchEngine(emails, Analyzer(), None, None, None)  # type: ignore[arg-type]
+
+
+def test_loading_fails_fast_and_names_the_missing_file_without_touching_the_model(tmp_path):
+    class ExplodingEncoder:
+        @property
+        def dim(self):
+            raise AssertionError("the model must not be loaded when files are missing")
+
+        def encode(self, texts, *, batch_size=64):
+            raise AssertionError("the model must not be used when files are missing")
+
+    with pytest.raises(FileNotFoundError) as caught:
+        SearchEngine.load(
+            processed_dir=tmp_path / "processed",
+            artifacts_dir=tmp_path / "artifacts",
+            encoder=ExplodingEncoder(),
+        )
+    assert "emails.parquet" in str(caught.value.filename)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import json
 import logging
 from dataclasses import dataclass
@@ -15,7 +16,7 @@ from maillens import config
 from maillens.filters import build_mask
 from maillens.index.inverted import InvertedIndex
 from maillens.pipeline import DENSE_DIR, SPARSE_DIR, load_dense_ranker
-from maillens.prep.corpus import load_emails
+from maillens.prep.corpus import EMAILS_FILE, load_emails
 from maillens.rankers.base import Hit, Ranker
 from maillens.rankers.bm25 import Bm25Ranker
 from maillens.rankers.dense import (
@@ -98,6 +99,14 @@ class SearchEngine:
         artifacts_dir: Path = config.ARTIFACTS_DIR,
         encoder: Encoder | None = None,
     ) -> SearchEngine:
+        # Fail fast, before the slow parts (corpus, indexes, the embedding model) are loaded.
+        for required in (
+            processed_dir / EMAILS_FILE,
+            artifacts_dir / SPARSE_DIR / "main" / "terms.json",
+            artifacts_dir / DENSE_DIR / "meta.json",
+        ):
+            if not required.exists():
+                raise FileNotFoundError(errno.ENOENT, "build this stage first", str(required))
         emails = load_emails(processed_dir)
         analyzer = Analyzer()
         index = InvertedIndex.load(artifacts_dir / SPARSE_DIR / "main")
