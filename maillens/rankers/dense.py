@@ -40,7 +40,7 @@ class SentenceTransformerEncoder:
 
         self._model = SentenceTransformer(model_name, device="cpu")
         self._model.max_seq_length = max_seq_length
-        dim = self._model.get_sentence_embedding_dimension()
+        dim = self._model.get_embedding_dimension()
         if dim is None:
             raise RuntimeError(f"{model_name} does not report an embedding size")
         self.dim = int(dim)
@@ -189,6 +189,16 @@ class DenseRanker:
             scores = np.where(allowed, scores, -np.inf)
         picked = top_k_indices(scores, k)
         return [Hit(int(d), float(scores[d]), r) for r, d in enumerate(picked, start=1)]
+
+    def rank_vectors(self, query_vectors: np.ndarray, k: int) -> list[np.ndarray]:
+        """Top-``k`` document ids (best first) for each already-encoded query.
+
+        Encoding every query in one batch is much faster than one call per query, which is what
+        the evaluation over thousands of queries needs.
+        """
+        return [
+            top_k_indices(self.doc_scores(vector), k).astype(np.int32) for vector in query_vectors
+        ]
 
     def best_chunk(self, query: str, doc_id: int) -> tuple[int, float]:
         """(index of the best chunk within the document, its cosine similarity)."""

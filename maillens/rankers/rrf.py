@@ -64,6 +64,25 @@ def reciprocal_rank_fusion(
     return [FusedHit(d, scores[d], ranks[d], shares[d]) for d in ordered]
 
 
+def fused_order(rankings: Sequence[Sequence[int]], *, k: int = RRF_K) -> list[int]:
+    """Just the fused document order, without the per-ranker explanation objects.
+
+    Identical ordering to ``reciprocal_rank_fusion`` (equal weights), but several times faster,
+    which matters when thousands of queries are fused for every setting of ``k`` in the
+    evaluation sweeps.
+    """
+    if k < 0:
+        raise ValueError(f"k must be >= 0, got {k}")
+    scores: dict[int, float] = {}
+    best_rank: dict[int, int] = {}
+    for ranking in rankings:
+        for rank, doc_id in enumerate(ranking, start=1):
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank)
+            if rank < best_rank.get(doc_id, rank + 1):
+                best_rank[doc_id] = rank
+    return sorted(scores, key=lambda d: (-scores[d], best_rank[d], d))
+
+
 class HybridRanker:
     """Runs several rankers and fuses their lists with RRF."""
 

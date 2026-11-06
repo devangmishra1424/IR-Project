@@ -15,8 +15,10 @@ import numpy as np
 
 _BATCH = 1000  # resamples drawn at a time, so memory stays bounded for large query sets
 
+Scores = Sequence[float] | np.ndarray
 
-def _paired_differences(a: Sequence[float], b: Sequence[float]) -> np.ndarray:
+
+def _paired_differences(a: Scores, b: Scores) -> np.ndarray:
     x, y = np.asarray(a, dtype=np.float64), np.asarray(b, dtype=np.float64)
     if x.shape != y.shape or x.ndim != 1:
         raise ValueError("a and b must be one-dimensional and the same length")
@@ -26,8 +28,8 @@ def _paired_differences(a: Sequence[float], b: Sequence[float]) -> np.ndarray:
 
 
 def paired_bootstrap_ci(
-    a: Sequence[float],
-    b: Sequence[float],
+    a: Scores,
+    b: Scores,
     *,
     n_resamples: int = 10_000,
     confidence: float = 0.95,
@@ -51,8 +53,8 @@ def paired_bootstrap_ci(
 
 
 def paired_randomization_pvalue(
-    a: Sequence[float],
-    b: Sequence[float],
+    a: Scores,
+    b: Scores,
     *,
     n_permutations: int = 10_000,
     seed: int = 0,

@@ -68,6 +68,13 @@ def test_document_score_is_its_best_chunk(ranker):
     assert [h.rank for h in hits] == [1, 2, 3]
 
 
+def test_batch_ranking_matches_one_query_at_a_time(ranker):
+    queries = ["solar panel", "wind farm", "lunch menu"]
+    batch = ranker.rank_vectors(ranker.encoder.encode(queries), k=3)
+    for query, ranked in zip(queries, batch, strict=True):
+        assert ranked.tolist() == [h.doc_id for h in ranker.search(query, 3)]
+
+
 def test_best_chunk_reports_which_chunk_matched(ranker):
     chunk, similarity = ranker.best_chunk("solar panel", doc_id=0)
     assert chunk == 1
