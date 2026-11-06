@@ -151,6 +151,20 @@ def run_evaluation(
 
     ci_rows = []
     test_pq = per_query[per_query["role"] == "test"]
+    # P@10 cannot exceed min(relevant, 10) / 10: with one relevant e-mail it is capped at 0.1.
+    ceilings = (
+        test_pq[test_pq["system"] == "bm25"]  # n_relevant is identical for every system
+        .assign(p10_ceiling=lambda d: d["n_relevant"].clip(upper=10) / 10)
+        .groupby("kind")
+        .agg(
+            queries=("qid", "size"),
+            mean_relevant=("n_relevant", "mean"),
+            median_relevant=("n_relevant", "median"),
+            p10_ceiling=("p10_ceiling", "mean"),
+        )
+        .reset_index()
+    )
+    _write_csv(ceilings, results_dir / "ceilings.csv")
     for (kind, system), group in test_pq.groupby(["kind", "system"]):
         row: dict[str, object] = {"kind": kind, "system": system, "queries": len(group)}
         for metric in ("MAP", "nDCG@10", "MRR", "P@10", "R@100"):

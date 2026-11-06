@@ -150,6 +150,14 @@ def test_easy_synthetic_queries_are_solved_by_every_ranker(evaluated):
     assert (main["MAP"] > 0.7).all()
 
 
+def test_p10_ceilings_reflect_how_many_documents_are_relevant(evaluated):
+    root, _, _, _ = evaluated
+    ceilings = pd.read_csv(root / "results" / "ceilings.csv").set_index("kind")
+    assert ceilings.loc["question", "p10_ceiling"] == pytest.approx(0.1)  # one relevant e-mail
+    assert ceilings.loc["subject", "p10_ceiling"] == pytest.approx(0.5)  # five relevant e-mails
+    assert ceilings.loc["subject", "mean_relevant"] == 5
+
+
 def test_significance_covers_every_comparison_kind_and_metric(evaluated):
     root, _, _, _ = evaluated
     sig = pd.read_csv(root / "results" / "significance.csv")
