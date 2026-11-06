@@ -100,6 +100,7 @@ def run_evaluation(
     *,
     results_dir: Path = config.RESULTS_DIR,
     artifacts_dir: Path = config.ARTIFACTS_DIR,
+    processed_dir: Path = config.PROCESSED_DIR,
     depth: int = config.EVAL_DEPTH,
 ) -> dict[str, object]:
     """Run the whole protocol and write every table to ``results_dir``."""
@@ -200,7 +201,7 @@ def run_evaluation(
         results_dir / "queries.csv",
     )
 
-    corpus_stats = json.loads((config.PROCESSED_DIR / "corpus_stats.json").read_text("utf-8"))
+    corpus_stats = json.loads((processed_dir / "corpus_stats.json").read_text("utf-8"))
     info = {
         "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "seconds": round(time.time() - started),
