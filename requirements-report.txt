@@ -1,0 +1,6 @@
+# Only needed to rebuild the report scaffold, the slides and to compress the demo video.
+-r requirements.txt
+python-docx>=1.1
+python-pptx>=1.0
+# Ships its own ffmpeg binary, so the video helper works without a system install.
+imageio-ffmpeg>=0.5
