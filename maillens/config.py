@@ -29,7 +29,9 @@ QUESTION_FILES = ("data/train-00000-of-00001.parquet", "data/test-00000-of-00001
 EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 SEED = 42
-SAMPLE_TARGET = 100_000  # e-mails in the evaluation corpus (see README for why)
+# E-mails in the evaluation corpus. Chosen so the dense index can be built on a laptop CPU in
+# about half an hour (measured: ~40 chunks/s with all-MiniLM-L6-v2 on a 6-core Ryzen 5 5600H).
+SAMPLE_TARGET = 50_000
 
 # Retrieval defaults.
 BM25_K1 = 1.2
@@ -41,7 +43,7 @@ UI_DEPTH = 200  # candidates fused per ranker in the search app
 # Dense retrieval: long e-mails are split into overlapping word windows (MaxP).
 CHUNK_WORDS = 140
 CHUNK_STRIDE = 120
-MAX_CHUNKS_PER_EMAIL = 8
+MAX_CHUNKS_PER_EMAIL = 4  # the first ~500 words; covers ~90% of e-mails completely
 
 # Bounds on pathological input (some Enron "e-mails" are megabytes of spreadsheet dump).
 MAX_BODY_CHARS = 20_000

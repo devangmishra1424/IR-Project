@@ -40,6 +40,7 @@ BATCH_ROWS = 25_000
 RAW_BODY_CAP = 5 * config.MAX_BODY_CHARS  # bounds memory while reading; cleaning trims further
 EMAILS_FILE = "emails.parquet"
 ANSWERS_FILE = "question_answers.parquet"
+RAW_BODIES_FILE = "raw_bodies.parquet"
 STATS_FILE = "corpus_stats.json"
 
 # The corpus covers 1997-2002; a handful of rows carry placeholder dates (1980, 2043, ...).
@@ -262,6 +263,12 @@ def build_corpus(
     )
     out_dir.mkdir(parents=True, exist_ok=True)
     _write_parquet(sample, out_dir / EMAILS_FILE)
+    # The untouched bodies are kept for the cleaning ablation (raw vs cleaned text).
+    raw_bodies = [bodies[m] for m in sample["message_id"]]
+    _write_parquet(
+        pd.DataFrame({"doc_id": sample["doc_id"], "raw_body": raw_bodies}),
+        out_dir / RAW_BODIES_FILE,
+    )
     _write_parquet(
         answerable[["qid", "question", "role", "kept_ids"]].rename(columns={"kept_ids": "answers"}),
         out_dir / ANSWERS_FILE,
@@ -276,3 +283,8 @@ def load_emails(out_dir: Path = config.PROCESSED_DIR) -> pd.DataFrame:
     df = pd.read_parquet(out_dir / EMAILS_FILE)
     df["text"] = (df["fresh"] + "\n" + df["quoted"]).str.strip()
     return df
+
+
+def load_raw_bodies(out_dir: Path = config.PROCESSED_DIR) -> pd.Series:
+    """The uncleaned (length-capped) bodies, indexed by doc_id."""
+    return pd.read_parquet(out_dir / RAW_BODIES_FILE).set_index("doc_id")["raw_body"]
