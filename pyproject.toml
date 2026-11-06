@@ -10,6 +10,8 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 [tool.ruff.lint.per-file-ignores]
 # Test fixtures are easier to read as long literal lines than as wrapped strings.
 "tests/*" = ["E501"]
+# HTML/CSS templates read better as long lines than as wrapped strings.
+"maillens/app/*" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
