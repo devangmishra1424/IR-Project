@@ -528,8 +528,9 @@ def render_about(engine: SearchEngine) -> None:
         st.markdown("#### The corpus")
         st.markdown(
             f"The raw dump holds **{stats['raw_rows']:,}** files, but **{stats['duplicate_content']:,}** "
-            f"of them are copies of another e-mail filed in a different folder (they carry different "
-            f"Message-IDs, so only the content gives them away). After removing copies and "
+            f"of them are copies of another e-mail (the same message filed in another folder or "
+            f"delivered to another mailbox; the copies carry different Message-IDs, so only the "
+            f"content gives them away). After removing copies and "
             f"{stats['dropped_implausible_date']:,} messages with impossible dates, "
             f"**{stats['unique_messages']:,}** distinct e-mails remain; this app searches a "
             f"sample of **{stats['sample_messages']:,}** of them in **{stats['sample_threads']:,}** "
