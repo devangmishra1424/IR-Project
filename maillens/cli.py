@@ -111,6 +111,22 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_analyze(args: argparse.Namespace) -> int:
+    import pandas as pd
+
+    from maillens.evaluation.analysis import length_analysis
+    from maillens.evaluation.queries import QUERIES_FILE, load_queries
+    from maillens.prep.corpus import load_emails
+
+    per_query = pd.read_csv(config.RESULTS_DIR / "per_query.csv.gz")
+    queries = load_queries(config.PROCESSED_DIR / QUERIES_FILE)
+    table = length_analysis(per_query, queries, load_emails())
+    path = config.RESULTS_DIR / "length_analysis.csv"
+    table.to_csv(path, index=False, float_format="%.4f")
+    log.info("wrote %s", path)
+    return 0
+
+
 def cmd_search(args: argparse.Namespace) -> int:
     from maillens.engine import SearchEngine
 
@@ -169,6 +185,9 @@ def build_parser() -> argparse.ArgumentParser:
     queries.set_defaults(run=cmd_queries)
 
     sub.add_parser("evaluate", help="run the full evaluation").set_defaults(run=cmd_evaluate)
+    sub.add_parser("analyze", help="e-mail length analysis of the results").set_defaults(
+        run=cmd_analyze
+    )
     sub.add_parser("figures", help="draw the figures from the results").set_defaults(
         run=cmd_figures
     )
