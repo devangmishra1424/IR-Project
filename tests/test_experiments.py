@@ -200,7 +200,7 @@ def test_run_info_records_provenance(evaluated):
 def test_all_figures_can_be_drawn_from_the_result_files(evaluated):
     root, _, emails, _ = evaluated
     paths = make_all_figures(root / "results", emails)
-    assert len(paths) == 5
+    assert len(paths) == 6
     for path in paths:
         assert path.exists() and path.read_bytes()[:4] == b"\x89PNG"
 

@@ -363,6 +363,7 @@ def make_all_figures(results_dir: Path, emails: pd.DataFrame) -> list[Path]:
             pd.read_csv(results_dir / "per_query.csv.gz"), out / "success_at_k.png"
         ),
         corpus_figure(emails, out / "corpus.png"),
+        pipeline_figure(info["corpus"], out / "pipeline.png"),
     ]
 
 

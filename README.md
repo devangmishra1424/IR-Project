@@ -31,6 +31,8 @@ the effect of RRF's constant, and a live explorer.*
 | Evaluation | P@10, R@100, MAP, nDCG@10, MRR; separate dev and test queries; bootstrap intervals and randomisation tests; ablations |
 | App | Streamlit: four columns, per-result rank chips, explanations, a thread viewer, a query explorer |
 
+![Architecture: offline indexing and the online query path](results/figures/pipeline.png)
+
 ## Results
 
 Test queries only. BM25's `k1 = 0.3` and `b = 0.75` were chosen on separate dev queries. Best value per column in bold; confidence intervals, significance tests and every ablation are in [`results/`](results/).
